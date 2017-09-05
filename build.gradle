@@ -1,0 +1,45 @@
+plugins {
+  id 'groovy'
+  id 'application'
+  id 'com.github.johnrengelman.shadow' version '1.2.3'
+}
+
+repositories {
+  mavenLocal()
+  mavenCentral()
+  flatDir {
+    dirs 'libs'
+  }
+}
+
+def vertxVersion = '3.4.2'
+sourceCompatibility = '1.8'
+mainClassName = 'io.vertx.core.Launcher'
+def mainVerticleName  =  "com.syc.vertx.MainVerticle"
+
+dependencies {
+  compile "io.vertx:vertx-core:${vertxVersion}"
+  compile "io.vertx:vertx-lang-groovy:${vertxVersion}"
+  compile "com.github.groovy-wslite:groovy-wslite:1.1.3"
+}
+
+processResources {
+  from 'src/main/groovy'
+}
+
+shadowJar {
+  classifier = 'fat'
+  manifest {
+    attributes 'Main-Verticle': 'groovy:com.syc.vertx.MainVerticle'
+  }
+  mergeServiceFiles {
+    include 'META-INF/services/io.vertx.core.spi.VerticleFactory'
+  }
+}
+run {
+  args = ['run', mainVerticleName]
+}
+
+task wrapper(type: Wrapper) {
+  gradleVersion = '4.0'
+}
